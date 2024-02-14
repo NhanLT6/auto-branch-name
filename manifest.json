@@ -1,0 +1,32 @@
+﻿{
+  "name": "Auto Branch Name",
+  "description": "Create branch name base on Jira ticket",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["contextMenus", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "images/branch-16.png",
+      "32": "images/branch-32.png",
+      "48": "images/branch-48.png",
+      "128": "images/branch-128.png"
+    }
+  },
+  "icons": {
+    "16": "images/branch-16.png",
+    "32": "images/branch-32.png",
+    "48": "images/branch-48.png",
+    "128": "images/branch-128.png"
+  }
+}
