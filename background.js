@@ -24,7 +24,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   if (commandId === "copy-as-branch") {
     const branchName = getFeatureBranchName(toKebabCase(title));
-
     await chrome.tabs.sendMessage(tab?.id, branchName);
   }
 

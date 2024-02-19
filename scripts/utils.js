@@ -10,6 +10,6 @@
 
 const isJiraTicketPage = (url) => url?.endsWith("Jira") || false;
 
-const getFeatureBranchName = (title) => "features/" + toKebabCase(title);
+const getFeatureBranchName = (title) => "feature/" + toKebabCase(title);
 
 export { toKebabCase, isJiraTicketPage, getFeatureBranchName };
