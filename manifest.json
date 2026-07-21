@@ -1,6 +1,6 @@
 ﻿{
   "name": "Copy as",
-  "description": "Copy page titles and URLs in multiple formats - branch names, commit messages, rich text, and markdown",
+  "description": "Copy any page's title and URL as a branch name, title, markdown, rich text, or Teams link.",
   "version": "2.1.0",
   "manifest_version": 3,
   "permissions": [
