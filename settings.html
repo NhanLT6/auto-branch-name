@@ -5,411 +5,675 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Copy As - Settings</title>
     <style>
+      :root {
+        --bg: #f4f3f0;
+        --panel: #ffffff;
+        --panel2: #faf9f7;
+        --ink: #1b1a17;
+        --muted: #78756d;
+        --faint: #a8a49b;
+        --line: rgba(20, 18, 14, 0.1);
+        --line2: rgba(20, 18, 14, 0.17);
+        --hover: rgba(20, 18, 14, 0.05);
+        --succ: #3f7d5a;
+        --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        --mono:
+          ui-monospace, 'Cascadia Code', 'Segoe UI Mono', Consolas, monospace;
+      }
+      :root[data-theme='dark'] {
+        --bg: #232120;
+        --panel: #2c2b28;
+        --panel2: #262422;
+        --ink: #eceae3;
+        --muted: #a4a196;
+        --faint: #767269;
+        --line: rgba(255, 255, 255, 0.11);
+        --line2: rgba(255, 255, 255, 0.18);
+        --hover: rgba(255, 255, 255, 0.06);
+        --succ: #82c99e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme]) {
+          --bg: #232120;
+          --panel: #2c2b28;
+          --panel2: #262422;
+          --ink: #eceae3;
+          --muted: #a4a196;
+          --faint: #767269;
+          --line: rgba(255, 255, 255, 0.11);
+          --line2: rgba(255, 255, 255, 0.18);
+          --hover: rgba(255, 255, 255, 0.06);
+          --succ: #82c99e;
+        }
+      }
+
       * {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
       }
-
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-          'Ubuntu', 'Cantarell', sans-serif;
-        line-height: 1.6;
-        color: #333;
-        background: #f8f9fa;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
         min-height: 100vh;
       }
-
-      .container {
-        max-width: 800px;
+      .mono {
+        font-family: var(--mono);
+      }
+      .wrap {
+        max-width: 820px;
         margin: 0 auto;
-        padding: 40px 20px;
+        padding: 40px 24px;
       }
 
-      .header {
-        background: white;
-        padding: 32px;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 32px;
-        border-left: 4px solid #4285f4;
+      .set {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: 0 18px 50px rgba(20, 18, 14, 0.14);
+        overflow: hidden;
+      }
+      :root[data-theme='dark'] .set {
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
       }
 
-      .header h1 {
-        font-size: 28px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 8px;
-      }
-
-      .header p {
-        font-size: 16px;
-        color: #666;
-        margin: 0;
-      }
-
-      .main-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 32px;
-        align-items: start;
-      }
-
-      .settings-panel {
-        display: grid;
-        gap: 24px;
-      }
-
-      .preview-panel {
-        position: relative;
-      }
-
-      .setting-card {
-        background: white;
-        padding: 24px;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .setting-card h2 {
-        font-size: 20px;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin: 0 0 20px 0;
+      .set-top {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #f0f0f0;
+        gap: 11px;
+        padding: 17px 24px;
+        border-bottom: 1px solid var(--line);
+      }
+      .ph-mark {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ink);
+        flex: none;
+      }
+      .set-wm {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .set-wm span {
+        color: var(--faint);
+        font-weight: 400;
+      }
+      .chip {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 2px 7px;
+        color: var(--muted);
+      }
+      .seg {
+        margin-left: auto;
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .seg button {
+        padding: 5px 12px;
+        font-size: 11.5px;
+        color: var(--muted);
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: var(--sans);
+      }
+      .seg button + button {
+        border-left: 1px solid var(--line);
+      }
+      .seg button.on {
+        background: var(--ink);
+        color: var(--panel);
       }
 
-      .setting-card .icon {
-        width: 20px;
-        height: 20px;
+      .set-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .set-cfg {
+        padding: 26px 26px 28px;
+      }
+      .set-prev {
+        padding: 26px 26px 28px;
+        background: var(--panel2);
+        border-left: 1px solid var(--line);
+      }
+      .sec-l {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .cfg-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .cfg-card + .cfg-card {
+        margin-top: 16px;
+      }
+      .cfg-card-h {
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel2);
+      }
+      .cfg-card-b {
+        padding: 16px 15px;
+      }
+
+      .fld-l {
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-bottom: 7px;
+      }
+      .inp {
+        width: 100%;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        padding: 10px 12px;
+        border: 1px solid var(--line2);
+        border-radius: 9px;
+        background: var(--panel2);
+        color: var(--ink);
+        outline: none;
+      }
+      .inp::placeholder {
+        color: var(--faint);
+      }
+      .inp:focus {
+        border-color: var(--ink);
+      }
+      .hint {
+        font-size: 11px;
+        line-height: 1.6;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .hint .c {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        background: var(--hover);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 1px 5px;
+        color: var(--muted);
+      }
+
+      .divx {
+        height: 1px;
+        background: var(--line);
+        margin: 24px 0;
+      }
+      .tog {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 2px 0;
+      }
+      .sw {
+        width: 36px;
+        height: 21px;
+        border-radius: 21px;
+        background: var(--line2);
+        border: 1px solid var(--line);
+        position: relative;
+        flex: none;
+        margin-top: 1px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+        padding: 0;
+      }
+      .sw.on {
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+      .knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--panel);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        transition: left 0.15s;
+      }
+      .sw.on .knob {
+        left: 17px;
+      }
+      .tog-t {
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+      .tog-d {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+        line-height: 1.5;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 11px;
+      }
+      .chipx {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: var(--mono);
+        font-size: 11px;
+        background: var(--panel2);
+        border: 1px solid var(--line2);
+        border-radius: 7px;
+        padding: 4px 8px 4px 9px;
+        color: var(--ink);
+        white-space: pre;
+      }
+      .chipx button {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1;
+        background: none;
+        border: none;
+        padding: 0;
+        width: 15px;
+        height: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        font-family: var(--sans);
+        transition:
+          color 0.12s,
+          background 0.12s;
+      }
+      .chipx button:hover {
+        color: var(--ink);
+        background: var(--hover);
+      }
+      .chip-add {
+        font-family: var(--mono);
+        font-size: 11px;
+        border: 1px dashed var(--line2);
+        border-radius: 7px;
+        padding: 5px 10px;
+        color: var(--ink);
+        background: transparent;
+        outline: none;
+        width: 84px;
+      }
+      .chip-add::placeholder {
+        color: var(--muted);
+      }
+
+      .pv-note {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin: 12px 0 15px;
+      }
+      .pv-src {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        margin-bottom: 16px;
+      }
+      .fav {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        background: var(--ink);
+        color: var(--panel);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        flex: none;
+      }
+      .pv-src-t {
+        font-size: 11.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pv-src-u {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        color: var(--faint);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 1px;
+      }
+
+      .pcard {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        overflow: hidden;
+      }
+      .pcard + .pcard {
+        margin-top: 11px;
+      }
+      .pcard-h {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 11px;
+        border-bottom: 1px solid var(--line);
+      }
+      .tile-sm {
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
+        border: 1px solid var(--line2);
+        background: var(--panel2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        flex: none;
+      }
+      .tile-sm svg {
+        display: block;
+      }
+      .pcard-nm {
+        font-size: 11.5px;
+        font-weight: 600;
+      }
+      .pcard-h .chip {
+        margin-left: auto;
+      }
+      .pcard-o {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        line-height: 1.55;
+        padding: 10px 11px;
+        color: var(--ink);
+        word-break: break-all;
+      }
+      .lnk {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        text-decoration-color: var(--line2);
+      }
+
+      .set-foot {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 15px 24px;
+        border-top: 1px solid var(--line);
+      }
+      .btn-ink {
+        background: var(--ink);
+        color: var(--panel);
+        border: none;
+        border-radius: 9px;
+        padding: 10px 20px;
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        letter-spacing: -0.01em;
+      }
+      .btn-ink:disabled {
+        cursor: default;
         opacity: 0.7;
       }
 
-      .control-group {
-        margin-bottom: 24px;
-      }
-
-      .control-group:last-child {
-        margin-bottom: 0;
-      }
-
-      .control-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #333;
-        font-size: 14px;
-      }
-
-      .control-group input,
-      .control-group select {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 14px;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        background: white;
-      }
-
-      .control-group input:focus,
-      .control-group select:focus {
-        outline: none;
-        border-color: #4285f4;
-        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
-      }
-
-      .help-text {
-        font-size: 13px;
-        color: #666;
-        margin-top: 6px;
-        line-height: 1.4;
-      }
-
-      .checkbox-group {
-        margin: 0 0 24px 0;
-      }
-
-      .checkbox-label {
-        display: flex;
-        align-items: flex-start;
-        cursor: pointer;
-        font-size: 14px;
-        color: #333;
-        padding: 16px 0;
-        border-bottom: 1px solid #f0f0f0;
-      }
-
-      .checkbox-label:first-child {
-        padding-top: 0;
-      }
-
-      .checkbox-label:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
-
-      .checkbox-label input[type='checkbox'] {
-        margin-right: 12px;
-        margin-top: 2px;
-        width: 18px;
-        height: 18px;
-        accent-color: #4285f4;
-      }
-
-      .checkbox-label .checkbox-text {
-        flex: 1;
-      }
-
-      .preview-section {
-        margin-top: 0;
-      }
-
-      .preview-grid {
-        display: grid;
-        gap: 16px;
-        margin-top: 0;
-      }
-
-      .preview-panel .setting-card {
-        position: sticky;
-        top: 20px;
-        height: fit-content;
-      }
-
-      /* Align the preview section header with settings sections */
-      .preview-section h2 {
-        margin: 0 0 20px 0;
-      }
-
-      .preview-section p {
-        margin-bottom: 20px;
-      }
-
-      .preview-item {
-        background: #f8f9fa;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        padding: 16px;
-        transition: border-color 0.2s;
-      }
-
-      .preview-item:hover {
-        border-color: #4285f4;
-      }
-
-      .preview-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 12px;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .preview-content {
-        font-family:
-          'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas,
-          'Courier New', monospace;
-        font-size: 13px;
-        color: #212529;
-        word-break: break-all;
-        line-height: 1.5;
-        background: white;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #dee2e6;
-      }
-
-      .save-section {
-        position: sticky;
-        bottom: 20px;
-        margin-top: 40px;
-      }
-
-      .save-button {
-        background: #4285f4;
-        color: white;
-        border: none;
-        padding: 14px 28px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-        display: block;
-        transition:
-          background-color 0.2s,
-          transform 0.1s;
-        box-shadow: 0 2px 4px rgba(66, 133, 244, 0.3);
-      }
-
-      .save-button:hover {
-        background: #3367d6;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(66, 133, 244, 0.4);
-      }
-
-      .save-button:active {
-        transform: translateY(0);
-      }
-
-      .save-button:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-      }
-
-
-      @media (max-width: 1024px) {
-        .main-content {
+      @media (max-width: 720px) {
+        .set-body {
           grid-template-columns: 1fr;
-          gap: 24px;
         }
-
-        .preview-panel .setting-card {
-          position: static;
-        }
-      }
-
-      @media (max-width: 640px) {
-        .container {
-          padding: 20px 16px;
-        }
-
-        .header,
-        .setting-card {
-          padding: 20px;
+        .set-prev {
+          border-left: none;
+          border-top: 1px solid var(--line);
         }
       }
     </style>
   </head>
   <body>
-    <!-- MAIN CONTAINER: Centered content with max width -->
-    <div class="container">
-      <!-- HEADER SECTION: Page title and description -->
-      <div class="header">
-        <h1>Copy As Settings</h1>
-        <p>
-          Configure how the extension formats your content across different
-          platforms and workflows
-        </p>
-      </div>
+    <div class="wrap">
+      <div class="set">
+        <!-- TOP BAR: wordmark, version chip, theme control -->
+        <div class="set-top">
+          <span class="ph-mark"></span>
+          <span class="set-wm">Copy as <span>· Settings</span></span>
+          <span class="chip" id="versionChip"></span>
+          <div class="seg" id="themeSeg" role="group" aria-label="Theme">
+            <button type="button" data-theme-val="light">Light</button>
+            <button type="button" data-theme-val="dark">Dark</button>
+            <button type="button" data-theme-val="system">System</button>
+          </div>
+        </div>
 
-      <!-- TWO-COLUMN LAYOUT: Settings on left, Preview on right -->
-      <div class="main-content">
-        <!-- LEFT COLUMN: Settings configuration -->
-        <div class="settings-panel">
-          <!-- SECTION 1: Branch Configuration Card -->
-          <div class="setting-card">
-            <h2>
-              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 15a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z"
+        <div class="set-body">
+          <!-- LEFT: configuration -->
+          <div class="set-cfg">
+            <div class="cfg-card">
+              <div class="cfg-card-h"><div class="sec-l">Branch</div></div>
+              <div class="cfg-card-b">
+                <div class="fld-l">Branch prefix</div>
+                <input
+                  class="inp"
+                  id="branchPrefix"
+                  type="text"
+                  placeholder="feature/"
                 />
-              </svg>
-              Branch Configuration
-            </h2>
+                <div class="hint">
+                  Prepended to branch names. Common:
+                  <span class="c">feature/</span> <span class="c">bugfix/</span>
+                  <span class="c">hotfix/</span>
+                </div>
+              </div>
+            </div>
 
-            <div class="control-group">
-              <label for="branchPrefix">Branch Prefix</label>
-              <input type="text" id="branchPrefix" placeholder="feature/" />
-              <div class="help-text">
-                Prefix for branch names. Common examples: feature/, bugfix/,
-                task/, hotfix/
+            <div class="cfg-card">
+              <div class="cfg-card-h">
+                <div class="sec-l">Title formatting</div>
+              </div>
+              <div class="cfg-card-b">
+                <div class="tog">
+                  <button
+                    class="sw"
+                    id="removeSuffixes"
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                    aria-label="Remove suffixes from titles"
+                  >
+                    <span class="knob"></span>
+                  </button>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="tog-t">Remove suffixes from titles</div>
+                    <div class="tog-d">
+                      Strips these from the end of a title. Add or remove any to
+                      fit your tools.
+                    </div>
+                    <div class="chips" id="suffixChips">
+                      <input
+                        class="chip-add"
+                        id="suffixAdd"
+                        type="text"
+                        placeholder="+ add"
+                        aria-label="Add a suffix to strip"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="divx"></div>
+
+                <div class="tog">
+                  <button
+                    class="sw"
+                    id="removeBrackets"
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                    aria-label="Remove ticket brackets"
+                  >
+                    <span class="knob"></span>
+                  </button>
+                  <div>
+                    <div class="tog-t">Remove ticket brackets</div>
+                    <div class="tog-d">
+                      <span class="mono">[PROJ-123]</span> →
+                      <span class="mono">PROJ-123</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 18px"></div>
+                <div class="fld-l">Title prefix</div>
+                <input
+                  class="inp"
+                  id="titlePrefix"
+                  type="text"
+                  placeholder="feat:"
+                />
+                <div class="hint">
+                  Prepended to titles. e.g. <span class="c">feat:</span>
+                  <span class="c">fix:</span> <span class="c">[API]</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- SECTION 2: Title Formatting Card -->
-          <div class="setting-card">
-            <h2>
-              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Title Formatting
-            </h2>
-
-            <div class="checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" id="removePlatformSuffix" checked />
-                <div class="checkbox-text">
-                  <strong>Remove platform suffixes</strong><br />
-                  <span style="color: #666; font-size: 13px"
-                    >Removes " - Jira", " - Azure DevOps", " - GitHub",
-                    etc.</span
-                  >
-                </div>
-              </label>
-
-              <label class="checkbox-label">
-                <input type="checkbox" id="removeBrackets" />
-                <div class="checkbox-text">
-                  <strong>Remove brackets around ticket numbers</strong><br />
-                  <span style="color: #666; font-size: 13px"
-                    >Converts [PROJ-123] to PROJ-123</span
-                  >
-                </div>
-              </label>
+          <!-- RIGHT: read-only preview -->
+          <div class="set-prev">
+            <div class="sec-l">Preview</div>
+            <div class="pv-note">
+              Example output from a sample ticket. Actual copying happens in the
+              popup or right-click menu.
             </div>
-
-            <div class="control-group">
-              <label for="titlePrefix">Title Prefix</label>
-              <input type="text" id="titlePrefix" placeholder="feat:" />
-              <div class="help-text">
-                Text to add before titles. Examples:<br />
-                <strong>Conventional commits:</strong> feat:, fix:, docs:,
-                refactor:, test:, chore:<br />
-                <strong>Team prefixes:</strong> [FRONTEND], [API], [MOBILE]<br />
-                <strong>Workflow tags:</strong> WIP:, DRAFT:, HOTFIX:
+            <div class="pv-src">
+              <span class="fav">J</span>
+              <div style="min-width: 0">
+                <div class="pv-src-t" id="pvSrcTitle"></div>
+                <div class="pv-src-u" id="pvSrcUrl"></div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- RIGHT COLUMN: Live preview -->
-        <div class="preview-panel">
-          <div class="setting-card preview-section">
-            <h2>
-              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path
-                  fill-rule="evenodd"
-                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              Live Preview
-            </h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 14px">
-              See how your settings affect each copy format in real-time
-            </p>
-
-            <!-- PREVIEW GRID: Shows all 4 copy formats -->
-            <div class="preview-grid" id="previewGrid">
-              <!-- Content will be generated by JavaScript -->
+            <div class="pcard">
+              <div class="pcard-h">
+                <span class="tile-sm"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="6" y1="3" x2="6" y2="15" />
+                    <circle cx="18" cy="6" r="3" />
+                    <circle cx="6" cy="18" r="3" />
+                    <path d="M18 9a9 9 0 0 1-9 9" /></svg
+                ></span>
+                <span class="pcard-nm">Branch</span>
+                <span class="chip">kebab</span>
+              </div>
+              <div class="pcard-o" id="pvBranch"></div>
+            </div>
+            <div class="pcard">
+              <div class="pcard-h">
+                <span class="tile-sm"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="4 7 4 4 20 4 20 7" />
+                    <line x1="9" y1="20" x2="15" y2="20" />
+                    <line x1="12" y1="4" x2="12" y2="20" /></svg
+                ></span>
+                <span class="pcard-nm">Title</span>
+                <span class="chip">plain</span>
+              </div>
+              <div class="pcard-o" id="pvTitle"></div>
+            </div>
+            <div class="pcard">
+              <div class="pcard-h">
+                <span class="tile-sm"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+                    <path d="M15 7h2a5 5 0 0 1 0 10h-2" />
+                    <line x1="8" y1="12" x2="16" y2="12" /></svg
+                ></span>
+                <span class="pcard-nm">Rich text</span>
+                <span class="chip">html</span>
+              </div>
+              <div class="pcard-o"><span class="lnk" id="pvRich"></span></div>
+            </div>
+            <div class="pcard">
+              <div class="pcard-h">
+                <span class="tile-sm"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M3 16V8l4 5 4-5v8" />
+                    <path d="M18 8v8" />
+                    <path d="M15 13l3 3 3-3" /></svg
+                ></span>
+                <span class="pcard-nm">Markdown</span>
+                <span class="chip">[t](url)</span>
+              </div>
+              <div class="pcard-o" id="pvMarkdown"></div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- SAVE SECTION: Save button at bottom -->
-      <div class="save-section">
-        <button class="save-button" id="saveButton">Save Settings</button>
+        <!-- FOOTER -->
+        <div class="set-foot">
+          <button class="btn-ink" id="saveButton">Save settings</button>
+        </div>
       </div>
     </div>
 

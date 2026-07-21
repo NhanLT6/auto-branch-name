@@ -1,6 +1,7 @@
-﻿const copyTeamsFormat = async (htmlContent) => {
+﻿/// Copy HTML as real rich content (text/html) with a text/plain fallback, so it
+/// pastes as a clickable link. Used for both "Rich text" and "Teams".
+const copyHtmlToClipboard = async (htmlContent) => {
   try {
-    // Try simple HTML format first (what Teams expects)
     const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
     const plainBlob = new Blob([htmlContent], { type: 'text/plain' });
 
@@ -11,13 +12,14 @@
 
     await navigator.clipboard.write([clipboardItem]);
   } catch {
-    // Fallback to execCommand which works reliably
+    // Fallback to writing the markup as plain text if rich write is unavailable
     await copyTextToClipboard(htmlContent);
   }
 };
 
+/// Copy plain text, falling back to a hidden textarea + execCommand.
 const copyTextToClipboard = async (text) => {
-  // Ensure document is focused for clipboard API
+  // Ensure the document is focused for the clipboard API
   try {
     window.focus();
     document.body.focus();
@@ -60,8 +62,8 @@ chrome.runtime.onMessage.addListener(async (message) => {
         return;
       }
 
-      // Copy HTML as plain text for standard rich text editors
-      await copyTextToClipboard(message.data);
+      // Copy as real rich text so it pastes as a clickable link
+      await copyHtmlToClipboard(message.data);
       return;
     }
 
@@ -75,7 +77,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
       }
 
       // Use simplified HTML format for Teams compatibility
-      await copyTeamsFormat(message.data);
+      await copyHtmlToClipboard(message.data);
       return;
     }
 
@@ -87,6 +89,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
     void error;
   }
 
-  // Always send a response to prevent "The message port closed before a response was received" errors
+  // Keep the message channel open for a response
   return true;
 });

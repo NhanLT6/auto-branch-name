@@ -1,4 +1,4 @@
-﻿const toKebabCase = (str) => {
+const toKebabCase = (str) => {
   if (!str) return '';
 
   return str
@@ -18,10 +18,54 @@ String.prototype.removeSquareBracketsInTicketNum = function () {
   return this.replace(/^(\[)(.*?)(])/, '$2');
 };
 
+// Default suffixes stripped from page titles; user-editable and persisted as
+// `suffixList`. These seed first run and migration from the old hardcoded set.
+const DEFAULT_SUFFIXES = [
+  ' - Jira',
+  ' - Azure DevOps',
+  ' - GitHub',
+  ' - GitLab',
+  ' - Linear',
+  ' - Asana',
+  ' - Trello',
+  ' - Monday.com',
+  ' - Confluence',
+  ' - Notion',
+  ' - ClickUp',
+  ' - Google Docs',
+];
+
+/// Single source of truth for settings: applies defaults and migrates the legacy
+/// `removePlatformSuffix` key to `removeSuffixes` + `suffixList`.
+const getSettings = async () => {
+  const s = await chrome.storage.sync.get([
+    'branchPrefix',
+    'removeSuffixes',
+    'removePlatformSuffix',
+    'suffixList',
+    'removeBrackets',
+    'titlePrefix',
+    'theme',
+  ]);
+
+  return {
+    branchPrefix: s.branchPrefix || 'feature/',
+    removeSuffixes:
+      s.removeSuffixes !== undefined
+        ? s.removeSuffixes
+        : s.removePlatformSuffix !== false, // migrate old key; default: true
+    suffixList: Array.isArray(s.suffixList)
+      ? s.suffixList
+      : [...DEFAULT_SUFFIXES],
+    removeBrackets: s.removeBrackets === true, // default: false
+    titlePrefix: s.titlePrefix || '',
+    theme: s.theme || 'system',
+  };
+};
+
 const getFeatureBranchName = async (title) => {
-  const result = await chrome.storage.sync.get(['branchPrefix']);
-  const prefix = result.branchPrefix || 'feature/';
-  return prefix + toKebabCase(title);
+  const { branchPrefix } = await getSettings();
+  return branchPrefix + toKebabCase(title);
 };
 
 const escapeHtml = (text) => {
@@ -30,39 +74,31 @@ const escapeHtml = (text) => {
   return div.innerHTML;
 };
 
+/// Clean a raw page title: strip a known suffix and optional brackets, add prefix.
 const getFormattedTitle = async (rawTitle) => {
-  const settings = await chrome.storage.sync.get([
-    'removePlatformSuffix',
-    'removeBrackets',
-    'titlePrefix',
-  ]);
+  const { removeSuffixes, suffixList, removeBrackets, titlePrefix } =
+    await getSettings();
 
   let title = rawTitle;
 
-  // Remove platform suffixes (Jira, Azure DevOps, etc.)
-  if (settings.removePlatformSuffix !== false) {
-    // Default: true
-    title = title
-      .replace(/( - Jira)$/, '')
-      .replace(/( - Azure DevOps)$/, '')
-      .replace(/( - GitHub)$/, '')
-      .replace(/( - GitLab)$/, '')
-      .replace(/( - Linear)$/, '')
-      .replace(/( - Asana)$/, '')
-      .replace(/( - Trello)$/, '')
-      .replace(/( - Monday\.com)$/, '');
+  // Strip a single trailing suffix from the user-managed list (e.g. " - Jira")
+  if (removeSuffixes) {
+    for (const suffix of suffixList) {
+      if (suffix && title.endsWith(suffix)) {
+        title = title.slice(0, -suffix.length);
+        break;
+      }
+    }
   }
 
   // Remove brackets around ticket numbers
-  if (settings.removeBrackets === true) {
-    // Default: false
+  if (removeBrackets) {
     title = title.replace(/^(\[)(.*?)(])(\s*)/, '$2$4');
   }
 
   // Add title prefix
-  const prefix = settings.titlePrefix || '';
-  if (prefix) {
-    title = `${prefix} ${title}`;
+  if (titlePrefix) {
+    title = `${titlePrefix} ${title}`;
   }
 
   return title.trim();
@@ -71,6 +107,8 @@ const getFormattedTitle = async (rawTitle) => {
 export {
   toKebabCase,
   isJiraTicketPage,
+  DEFAULT_SUFFIXES,
+  getSettings,
   getFeatureBranchName,
   getFormattedTitle,
   escapeHtml,

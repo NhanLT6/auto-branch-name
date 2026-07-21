@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a versatile browser extension that helps developers copy page titles and URLs in multiple useful formats. Originally designed for Jira tickets, it now works on any web page to generate formatted text for development workflows.
+Copy any page's title and URL as a branch name, title, markdown, rich text, or Teams link. Made for dev and product teams.
 
 This extension can:
 

@@ -7,57 +7,41 @@
 // Import the String prototype extensions - these are added when utils.js is imported
 import './scripts/utils.js';
 
-// Copy as Branch
-chrome.contextMenus.create({
-  id: 'copy-as-branch',
-  title: 'Copy as Branch',
+const CONTEXT_MENU_ITEMS = [
+  { id: 'copy-as-branch', title: 'Copy as Branch' },
+  { id: 'copy-as-title', title: 'Copy as Title' },
+  { id: 'copy-as-rich-text', title: 'Copy as Rich text' },
+  { id: 'copy-as-markdown', title: 'Copy as Markdown' },
+  { id: 'copy-as-teams', title: 'Copy as Teams' },
+];
+
+// Create menus on install only; at the worker's top level this re-runs on every
+// wake and throws "duplicate id" errors. Menus persist across restarts.
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.removeAll(() => {
+    for (const item of CONTEXT_MENU_ITEMS) {
+      chrome.contextMenus.create(item);
+    }
+  });
 });
 
-// Copy as Title
-chrome.contextMenus.create({
-  id: 'copy-as-title',
-  title: 'Copy as Title',
-});
-
-// Copy as Rich text
-chrome.contextMenus.create({
-  id: 'copy-as-rich-text',
-  title: 'Copy as Rich text',
-});
-
-// Copy as Markdown
-chrome.contextMenus.create({
-  id: 'copy-as-markdown',
-  title: 'Copy as Markdown',
-});
-
-// Copy as Teams
-chrome.contextMenus.create({
-  id: 'copy-as-teams',
-  title: 'Copy as Teams',
-});
-
-// Function to send message to tab with error handling and content script injection
+/// Send a message to the tab; on failure, inject the content script and retry.
 async function sendMessageToTab(tabId, message) {
   try {
-    // First, try to send the message
     await chrome.tabs.sendMessage(tabId, message);
   } catch {
-    // If it fails, try to inject the content script and then send message
     await chrome.scripting.executeScript({
       target: { tabId: tabId },
       files: ['scripts/content.js'],
     });
 
-    // Wait a bit for the content script to initialize and gain user activation context
+    // Give the content script a moment to initialize
     await new Promise((resolve) => setTimeout(resolve, 200));
-
-    // Try sending message again
     await chrome.tabs.sendMessage(tabId, message);
   }
 }
 
-// Unified handler function for both context menu and command events
+/// Run a copy command from the context menu or a keyboard shortcut.
 async function handleAction(commandId, tab) {
   try {
     if (!tab?.id || !tab?.title) {

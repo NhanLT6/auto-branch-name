@@ -5,256 +5,361 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Copy As</title>
     <style>
+      :root {
+        --panel: #ffffff;
+        --panel2: #faf9f7;
+        --ink: #1b1a17;
+        --muted: #78756d;
+        --faint: #a8a49b;
+        --line: rgba(20, 18, 14, 0.1);
+        --line2: rgba(20, 18, 14, 0.17);
+        --hover: rgba(20, 18, 14, 0.05);
+        --succ: #3f7d5a;
+        --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        --mono:
+          ui-monospace, 'Cascadia Code', 'Segoe UI Mono', Consolas, monospace;
+      }
+      :root[data-theme='dark'] {
+        --panel: #2c2b28;
+        --panel2: #262422;
+        --ink: #eceae3;
+        --muted: #a4a196;
+        --faint: #767269;
+        --line: rgba(255, 255, 255, 0.11);
+        --line2: rgba(255, 255, 255, 0.18);
+        --hover: rgba(255, 255, 255, 0.06);
+        --succ: #82c99e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme]) {
+          --panel: #2c2b28;
+          --panel2: #262422;
+          --ink: #eceae3;
+          --muted: #a4a196;
+          --faint: #767269;
+          --line: rgba(255, 255, 255, 0.11);
+          --line2: rgba(255, 255, 255, 0.18);
+          --hover: rgba(255, 255, 255, 0.06);
+          --succ: #82c99e;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
       body {
-        width: 320px;
-        padding: 0;
         margin: 0;
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f8f9fa;
+        width: 322px;
+        background: var(--panel);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      body.closing {
+        opacity: 0;
+        transform: scale(0.95) translateY(-4px);
+      }
+      .mono {
+        font-family: var(--mono);
       }
 
-      .header {
-        background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
-        color: white;
-        padding: 20px;
-        text-align: center;
-      }
-
-      .header h1 {
-        margin: 0 0 4px 0;
-        font-size: 20px;
-        font-weight: 600;
-      }
-
-      .header p {
-        margin: 0;
-        font-size: 13px;
-        opacity: 0.9;
-      }
-
-      .content {
-        padding: 20px;
-      }
-
-      .quick-actions {
-        margin-bottom: 20px;
-      }
-
-      .quick-actions h2 {
-        font-size: 16px;
-        margin: 0 0 12px 0;
-        color: #333;
-        font-weight: 600;
-      }
-
-      .action-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .action-grid.five-items {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-
-      .action-grid.five-items .action-btn:last-child {
-        grid-column: 2;
-      }
-
-      .action-btn {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        padding: 12px 8px;
-        font-size: 12px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
-        color: #333;
-      }
-
-      .action-btn:hover {
-        background: #f5f5f5;
-        border-color: #4285f4;
-        color: #4285f4;
-      }
-
-      .action-btn .icon {
-        display: block;
-        margin: 0 auto 6px;
-        width: 18px;
-        height: 18px;
-        opacity: 0.7;
-      }
-
-      .settings-section {
-        border-top: 1px solid #e0e0e0;
-        padding-top: 20px;
-      }
-
-      .settings-btn {
+      .ph {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 16px;
-        text-decoration: none;
-        color: #333;
-        transition: all 0.2s;
-        font-size: 14px;
+        gap: 8px;
+        padding: 13px 15px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .ph-mark {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ink);
+        flex: none;
+      }
+      .ph-t {
+        font-weight: 600;
+        font-size: 13.5px;
+        letter-spacing: -0.01em;
+      }
+      .ph-s {
+        font-size: 10.5px;
+        color: var(--faint);
+        letter-spacing: 0.02em;
+      }
+      .set-btn {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        border-radius: 7px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: var(--muted);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .set-btn:hover {
+        background: var(--hover);
+        color: var(--ink);
+      }
+      .set-btn svg {
+        display: block;
       }
 
-      .settings-btn:hover {
-        background: #f5f5f5;
-        border-color: #4285f4;
-      }
-
-      .settings-btn .left {
+      .row {
         display: flex;
         align-items: center;
         gap: 12px;
+        width: 100%;
+        padding: 11px 15px;
+        cursor: pointer;
+        position: relative;
+        border: none;
+        background: none;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+        transition: background 0.15s ease;
       }
-
-      .settings-btn .icon {
-        width: 20px;
-        height: 20px;
-        opacity: 0.7;
+      .row:hover {
+        background: var(--hover);
       }
-
-      .settings-btn .arrow {
-        width: 16px;
-        height: 16px;
-        opacity: 0.5;
+      .tile {
+        position: relative;
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+        border: 1px solid var(--line2);
+        background: var(--panel2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
       }
-
-      .usage-hint {
-        background: #e3f2fd;
-        border: 1px solid #bbdefb;
-        border-radius: 6px;
-        padding: 12px;
-        margin-top: 16px;
-        font-size: 12px;
-        color: #1565c0;
-        line-height: 1.4;
+      .tile-mono {
+        display: flex;
+        color: var(--muted);
+        transition: opacity 0.12s;
       }
-
-      .usage-hint strong {
+      .tile svg {
         display: block;
-        margin-bottom: 4px;
+      }
+      .chk-ov {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1;
+        opacity: 0;
+        transition: opacity 0.12s;
+      }
+      .row-tx {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .row-nm {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .row-sp {
+        font-size: 10.5px;
+        color: var(--muted);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 198px;
+      }
+      .row.copied .tile {
+        background: var(--succ);
+        border-color: transparent;
+      }
+      .row.copied .tile-mono {
+        opacity: 0;
+      }
+      .row.copied .chk-ov {
+        opacity: 1;
+      }
+
+      .pf {
+        padding: 10px 15px;
+        border-top: 1px solid var(--line);
+        font-size: 11px;
+        color: var(--faint);
+        line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <!-- HEADER SECTION: Gradient background with title and description -->
-    <div class="header">
-      <h1>Copy As</h1>
-      <p>Format content for different workflows</p>
+    <!-- HEADER: ink dot, wordmark, "this page" caption, settings gear -->
+    <div class="ph">
+      <span class="ph-mark"></span>
+      <span class="ph-t">Copy as</span>
+      <span class="ph-s">this page</span>
+      <button
+        class="set-btn"
+        id="settingsBtn"
+        title="Settings"
+        aria-label="Settings"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
+      </button>
     </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <div class="content">
-      <!-- QUICK ACTIONS: 3x2 grid with 5 action buttons -->
-      <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="action-grid five-items">
-          <!-- BUTTON 1: Copy as Branch (feature/branch-name) -->
-          <div class="action-btn" data-action="copy-as-branch">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 15a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z"
-              />
-            </svg>
-            Branch
-          </div>
+    <!-- ACTION ROWS: click to copy that format -->
+    <button class="row" data-action="copy-as-branch">
+      <span class="tile"
+        ><span class="tile-mono"
+          ><svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="6" y1="3" x2="6" y2="15" />
+            <circle cx="18" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <path d="M18 9a9 9 0 0 1-9 9" /></svg></span
+        ><span class="chk-ov">✓</span></span
+      >
+      <span class="row-tx">
+        <span class="row-nm">Branch</span>
+        <span class="row-sp mono" data-role="branch-sample"
+          >feature/&hellip;</span
+        >
+      </span>
+    </button>
 
-          <!-- BUTTON 2: Copy as Title (formatted page title) -->
-          <div class="action-btn" data-action="copy-as-title">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Title
-          </div>
+    <button class="row" data-action="copy-as-title">
+      <span class="tile"
+        ><span class="tile-mono"
+          ><svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="4 7 4 4 20 4 20 7" />
+            <line x1="9" y1="20" x2="15" y2="20" />
+            <line x1="12" y1="4" x2="12" y2="20" /></svg></span
+        ><span class="chk-ov">✓</span></span
+      >
+      <span class="row-tx">
+        <span class="row-nm">Title</span>
+        <span class="row-sp">Plain formatted title</span>
+      </span>
+    </button>
 
-          <!-- BUTTON 3: Copy as Rich Text (HTML for general use) -->
-          <div class="action-btn" data-action="copy-as-rich-text">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Rich Text
-          </div>
+    <button class="row" data-action="copy-as-rich-text">
+      <span class="tile"
+        ><span class="tile-mono"
+          ><svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+            <path d="M15 7h2a5 5 0 0 1 0 10h-2" />
+            <line x1="8" y1="12" x2="16" y2="12" /></svg></span
+        ><span class="chk-ov">✓</span></span
+      >
+      <span class="row-tx">
+        <span class="row-nm">Rich text</span>
+        <span class="row-sp">Clickable HTML link</span>
+      </span>
+    </button>
 
-          <!-- BUTTON 4: Copy as Markdown ([title](url)) -->
-          <div class="action-btn" data-action="copy-as-markdown">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Markdown
-          </div>
+    <button class="row" data-action="copy-as-markdown">
+      <span class="tile"
+        ><span class="tile-mono"
+          ><svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 16V8l4 5 4-5v8" />
+            <path d="M18 8v8" />
+            <path d="M15 13l3 3 3-3" /></svg></span
+        ><span class="chk-ov">✓</span></span
+      >
+      <span class="row-tx">
+        <span class="row-nm">Markdown</span>
+        <span class="row-sp mono">[title](url)</span>
+      </span>
+    </button>
 
-          <!-- BUTTON 5: Copy as Teams (CF_HTML format for Teams rich previews) -->
-          <div class="action-btn" data-action="copy-as-teams">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Teams
-          </div>
-        </div>
-      </div>
+    <button class="row" data-action="copy-as-teams">
+      <span class="tile"
+        ><span class="tile-mono"
+          ><svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+        ><span class="chk-ov">✓</span></span
+      >
+      <span class="row-tx">
+        <span class="row-nm">Teams</span>
+        <span class="row-sp">Rich link for Teams</span>
+      </span>
+    </button>
 
-      <!-- SETTINGS SECTION: Single button to open settings page -->
-      <div class="settings-section">
-        <div class="settings-btn" id="settingsBtn">
-          <div class="left">
-            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <div>
-              <strong>Settings</strong><br />
-              <span style="font-size: 12px; color: #666"
-                >Configure formatting options</span
-              >
-            </div>
-          </div>
-          <svg class="arrow" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-
-      <!-- USAGE HINT: Blue box with tips about right-click and shortcuts -->
-      <div class="usage-hint">
-        <strong>Tip:</strong>
-        Right-click on any page to access these functions from the context menu,
-        or use keyboard shortcuts for quick access.
-      </div>
+    <!-- FOOTER -->
+    <div class="pf">
+      Click a format to copy. The popup closes automatically.
     </div>
 
     <script src="./popup.js"></script>

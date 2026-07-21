@@ -1,55 +1,109 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Add event listeners to action buttons
-  const actionBtns = document.querySelectorAll('.action-btn');
-  actionBtns.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const action = btn.getAttribute('data-action');
-      if (action) {
-        await copyFromCurrentPage(action);
-      }
-    });
-  });
-
-  // Add event listener to settings button
-  const settingsBtn = document.getElementById('settingsBtn');
-  if (settingsBtn) {
-    settingsBtn.addEventListener('click', openSettings);
-  }
-});
-
-// Function to send message to tab with error handling and content script injection
-async function sendMessageToTab(tabId, message) {
-  try {
-    // First, try to send the message
-    await chrome.tabs.sendMessage(tabId, message);
-  } catch {
-    // If it fails, try to inject the content script and then send message
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        files: ['scripts/content.js'],
-      });
-
-      // Wait a bit for the content script to initialize and gain user activation context
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // Try sending message again
-      await chrome.tabs.sendMessage(tabId, message);
-    } catch {
-      // If injection fails, fall back to direct clipboard API
-      // Use the popup's clipboard API as fallback
-      if (typeof message === 'string') {
-        await navigator.clipboard.writeText(message);
-      } else if (message?.action === 'copy-as-rich-text' && message?.data) {
-        const blob = new Blob([message.data], { type: 'text/html' });
-        const clipboardItem = new ClipboardItem({ 'text/html': blob });
-        await navigator.clipboard.write([clipboardItem]);
-      }
-    }
+/// Apply a theme choice to the page; "system" defers to prefers-color-scheme.
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') {
+    root.setAttribute('data-theme', theme);
+  } else {
+    root.removeAttribute('data-theme');
   }
 }
 
-// Function to copy from current page - directly use background script logic
+document.addEventListener('DOMContentLoaded', async () => {
+  const { getSettings, getFeatureBranchName, isJiraTicketPage } = await import(
+    '../scripts/utils.js'
+  );
+
+  // Theme
+  try {
+    const { theme } = await getSettings();
+    applyTheme(theme);
+  } catch (error) {
+    void error;
+  }
+
+  // Show the real branch name this page would produce, in the Branch row
+  try {
+    const [activeTab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (activeTab?.title) {
+      const cleanTitle = isJiraTicketPage(activeTab.title)
+        ? activeTab.title.removeJiraSuffix().removeSquareBracketsInTicketNum()
+        : activeTab.title;
+      const branchName = await getFeatureBranchName(cleanTitle);
+      const sample = document.querySelector('[data-role="branch-sample"]');
+      if (sample && branchName) {
+        sample.textContent = branchName;
+      }
+    }
+  } catch (error) {
+    void error;
+  }
+
+  // Action rows: copy → confirm → animate out → close
+  let busy = false;
+  document.querySelectorAll('.row').forEach((row) => {
+    row.addEventListener('click', async () => {
+      if (busy) return;
+      busy = true;
+
+      const action = row.getAttribute('data-action');
+      if (action) {
+        await copyFromCurrentPage(action);
+      }
+
+      row.classList.add('copied');
+      setTimeout(() => {
+        document.body.classList.add('closing');
+        setTimeout(() => window.close(), 300);
+      }, 560);
+    });
+  });
+
+  // Open the settings page
+  const settingsBtn = document.getElementById('settingsBtn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      chrome.runtime.openOptionsPage();
+      window.close();
+    });
+  }
+});
+
+/// Copy from the popup itself, which is focused and click-activated so rich
+/// writes work. Pass a string for plain text, or { html } for rich content.
+async function copyToClipboard(payload) {
+  try {
+    if (typeof payload === 'string') {
+      await navigator.clipboard.writeText(payload);
+      return;
+    }
+    const htmlBlob = new Blob([payload.html], { type: 'text/html' });
+    const plainBlob = new Blob([payload.html], { type: 'text/plain' });
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': plainBlob }),
+    ]);
+  } catch (error) {
+    // Last-resort fallback if the async Clipboard API is unavailable
+    const text = typeof payload === 'string' ? payload : payload.html;
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch (fallbackError) {
+      void fallbackError;
+    }
+    document.body.removeChild(textArea);
+    void error;
+  }
+}
+
+/// Build the formatted value for the active tab and copy it.
 async function copyFromCurrentPage(commandId) {
   try {
     const [activeTab] = await chrome.tabs.query({
@@ -57,65 +111,36 @@ async function copyFromCurrentPage(commandId) {
       currentWindow: true,
     });
 
-    if (activeTab) {
-      // Use the same logic as background.js but directly here
-      // Import utility functions
-      const { getFeatureBranchName, getFormattedTitle, isJiraTicketPage } =
-        await import('../scripts/utils.js');
+    if (!activeTab?.id || !activeTab?.title) {
+      return;
+    }
 
-      if (!activeTab.id || !activeTab.title) {
-        return;
-      }
+    const { getFeatureBranchName, getFormattedTitle, isJiraTicketPage } =
+      await import('../scripts/utils.js');
 
-      if (commandId === 'copy-as-branch') {
-        // For branch names, use the legacy logic to avoid breaking existing workflows
-        const title = isJiraTicketPage(activeTab.title)
-          ? activeTab.title.removeJiraSuffix().removeSquareBracketsInTicketNum()
-          : activeTab.title;
-        const branchName = await getFeatureBranchName(title);
-        await sendMessageToTab(activeTab.id, branchName);
-      }
-
-      if (commandId === 'copy-as-title') {
-        const formattedTitle = await getFormattedTitle(activeTab.title);
-        await sendMessageToTab(activeTab.id, formattedTitle);
-      }
-
-      if (commandId === 'copy-as-rich-text') {
-        const formattedTitle = await getFormattedTitle(activeTab.title);
-        const message = `<a href="${activeTab.url}">${formattedTitle}</a>`;
-        await sendMessageToTab(activeTab.id, {
-          action: 'copy-as-rich-text',
-          data: message,
-        });
-      }
-
-      if (commandId === 'copy-as-markdown') {
-        const formattedTitle = await getFormattedTitle(activeTab.title);
-        const markdown = `[${formattedTitle}](${activeTab.url})`;
-        await sendMessageToTab(activeTab.id, markdown);
-      }
-
-      if (commandId === 'copy-as-teams') {
-        const formattedTitle = await getFormattedTitle(activeTab.title);
-        const htmlMessage = `<a href="${activeTab.url}">${formattedTitle}</a>`;
-        await sendMessageToTab(activeTab.id, {
-          action: 'copy-as-teams',
-          data: htmlMessage,
-        });
-      }
-
-      // Close popup after successful copy
-      window.close();
+    if (commandId === 'copy-as-branch') {
+      // Legacy branch logic to avoid breaking existing workflows
+      const title = isJiraTicketPage(activeTab.title)
+        ? activeTab.title.removeJiraSuffix().removeSquareBracketsInTicketNum()
+        : activeTab.title;
+      await copyToClipboard(await getFeatureBranchName(title));
+    } else if (commandId === 'copy-as-title') {
+      await copyToClipboard(await getFormattedTitle(activeTab.title));
+    } else if (commandId === 'copy-as-markdown') {
+      const formattedTitle = await getFormattedTitle(activeTab.title);
+      await copyToClipboard(`[${formattedTitle}](${activeTab.url})`);
+    } else if (
+      commandId === 'copy-as-rich-text' ||
+      commandId === 'copy-as-teams'
+    ) {
+      // Both paste as a real clickable link (text/html + text/plain fallback)
+      const formattedTitle = await getFormattedTitle(activeTab.title);
+      await copyToClipboard({
+        html: `<a href="${activeTab.url}">${formattedTitle}</a>`,
+      });
     }
   } catch (error) {
     // Silently handle errors to avoid console spam
     void error;
   }
-}
-
-// Function to open settings page
-function openSettings() {
-  chrome.runtime.openOptionsPage();
-  window.close();
 }
