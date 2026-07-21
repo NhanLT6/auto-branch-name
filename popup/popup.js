@@ -9,9 +9,12 @@ function applyTheme(theme) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const { getSettings, getFeatureBranchName, isJiraTicketPage } = await import(
-    '../scripts/utils.js'
-  );
+  const {
+    getSettings,
+    getFeatureBranchName,
+    getFormattedTitle,
+    isJiraTicketPage,
+  } = await import('../scripts/utils.js');
 
   // Theme
   try {
@@ -21,7 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     void error;
   }
 
-  // Show the real branch name this page would produce, in the Branch row
+  // Fill the Branch, Title and Markdown rows with what this page would copy.
+  // Rich text and Teams paste as HTML links, so their captions stay static.
   try {
     const [activeTab] = await chrome.tabs.query({
       active: true,
@@ -32,9 +36,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? activeTab.title.removeJiraSuffix().removeSquareBracketsInTicketNum()
         : activeTab.title;
       const branchName = await getFeatureBranchName(cleanTitle);
-      const sample = document.querySelector('[data-role="branch-sample"]');
-      if (sample && branchName) {
-        sample.textContent = branchName;
+      const formattedTitle = await getFormattedTitle(activeTab.title);
+
+      setSample('branch-sample', branchName);
+      setSample('title-sample', formattedTitle);
+      if (activeTab.url) {
+        const url = activeTab.url
+          .replace(/^https?:\/\//, '')
+          .replace(/^www\./, '');
+        setSample(
+          'markdown-sample',
+          `[${truncate(formattedTitle, 14)}](${truncate(url, 10)})`
+        );
       }
     }
   } catch (error) {
@@ -70,6 +83,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
+/// Fill a preview caption when we have a real value; otherwise leave the
+/// static placeholder from the markup in place.
+function setSample(role, value) {
+  const el = document.querySelector(`[data-role="${role}"]`);
+  if (el && value) {
+    el.textContent = value;
+  }
+}
+
+/// Shorten a string for a preview caption, adding an ellipsis when it is cut.
+function truncate(text, max) {
+  const value = String(text);
+  return value.length > max ? `${value.slice(0, max).trimEnd()}…` : value;
+}
 
 /// Copy from the popup itself, which is focused and click-activated so rich
 /// writes work. Pass a string for plain text, or { html } for rich content.

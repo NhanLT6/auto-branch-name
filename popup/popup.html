@@ -74,11 +74,10 @@
         border-bottom: 1px solid var(--line);
       }
       .ph-mark {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--ink);
+        width: 17px;
+        height: 17px;
         flex: none;
+        display: block;
       }
       .ph-t {
         font-weight: 600;
@@ -203,9 +202,34 @@
     </style>
   </head>
   <body>
-    <!-- HEADER: ink dot, wordmark, "this page" caption, settings gear -->
+    <!-- HEADER: extension mark, wordmark, "this page" caption, settings gear -->
     <div class="ph">
-      <span class="ph-mark"></span>
+      <svg class="ph-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <rect
+          x="0"
+          y="0"
+          width="64"
+          height="64"
+          rx="12"
+          style="fill: var(--ink)"
+        />
+        <rect
+          x="10"
+          y="10"
+          width="31"
+          height="31"
+          rx="7"
+          style="fill: none; stroke: var(--panel); stroke-width: 4.5"
+        />
+        <rect
+          x="23"
+          y="23"
+          width="31"
+          height="31"
+          rx="7"
+          style="fill: var(--ink); stroke: var(--panel); stroke-width: 4.5"
+        />
+      </svg>
       <span class="ph-t">Copy as</span>
       <span class="ph-s">this page</span>
       <button
@@ -280,7 +304,9 @@
       >
       <span class="row-tx">
         <span class="row-nm">Title</span>
-        <span class="row-sp">Plain formatted title</span>
+        <span class="row-sp" data-role="title-sample"
+          >Plain formatted title</span
+        >
       </span>
     </button>
 
@@ -328,7 +354,9 @@
       >
       <span class="row-tx">
         <span class="row-nm">Markdown</span>
-        <span class="row-sp mono">[title](url)</span>
+        <span class="row-sp mono" data-role="markdown-sample"
+          >[title](url)</span
+        >
       </span>
     </button>
 

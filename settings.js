@@ -11,7 +11,7 @@ function applyTheme(theme) {
 document.addEventListener('DOMContentLoaded', async () => {
   const { getSettings, toKebabCase } = await import('./scripts/utils.js');
 
-  const SAMPLE_RAW = 'PROJ-123 Update onboarding checklist - Jira';
+  const SAMPLE_RAW = '[PROJ-123] Update onboarding checklist - Jira';
   const SAMPLE_URL = 'https://company.atlassian.net/browse/PROJ-123';
 
   const branchPrefixInput = document.getElementById('branchPrefix');
@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     versionChip.textContent = `v${version}`;
   }
 
+  // Source title carries a bracketed ticket like a real Jira tab, so the
+  // "Remove ticket brackets" toggle changes the preview live.
   document.getElementById('pvSrcTitle').textContent = SAMPLE_RAW;
   document.getElementById('pvSrcUrl').textContent =
     'company.atlassian.net/browse/PROJ-123';
-  // The sample has no brackets, so the "Remove ticket brackets" toggle has no
-  // visible effect here; it still applies to real page titles.
 
   renderChips();
   updatePreview();
